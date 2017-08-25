@@ -17,6 +17,8 @@ services:
       TA_COORD: ${TA_COORD}
       CUPE_SITE: ${CUPE_SITE}
       RECIPIENT: ${RECIPIENT}
+      HR_ADMIN_EMAIL: ${HR_ADMIN_EMAIL}
+      HR_ADMIN_NAME: ${HR_ADMIN_NAME}
     networks:
       - default
     ports:
