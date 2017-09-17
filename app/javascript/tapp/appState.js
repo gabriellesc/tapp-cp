@@ -7,8 +7,9 @@ import { routeConfig } from './routeConfig.js';
 const initialState = {
     // navbar component
     nav: {
-        role: 'role',
-        user: 'user',
+        roles: [], // array of { 'tapp_admin', 'instructor' }
+        selectedRole: null,
+        user: null,
 
         selectedTab: null,
 
@@ -260,8 +261,8 @@ class AppState {
         return this.get('nav.user');
     }
 
-    getCurrentUserRole() {
-        return this.get('nav.role');
+    getCurrentUserRoles() {
+        return this.get('nav.roles');
     }
 
     getFilters() {
@@ -283,6 +284,10 @@ class AppState {
 
     getSelectedRound() {
         return this.get('selectedRound');
+    }
+
+    getSelectedUserRole() {
+        return this.get('nav.selectedRole');
     }
 
     // return the name of the appState component that corresponds to the currently selected view
@@ -392,9 +397,21 @@ class AppState {
         this.set('abcView.selectedCourses', fromJS([course.toString()]));
     }
 
+    selectUserRole(role) {
+        this.set('nav.selectedRole', role);
+    }
+
     // set the course panel layout in the ABC view
     setCoursePanelLayout(layout) {
         this.set('abcView.panelLayout', layout);
+    }
+
+    setCurrentUserName(user) {
+        this.set('nav.user', user);
+    }
+
+    setCurrentUserRoles(roles) {
+        this.set('nav.roles', roles);
     }
 
     // change the number of hours of a temporary assignment
@@ -569,7 +586,7 @@ class AppState {
     addInstructor(courseId, instructorId) {
         let val = this.getCoursesList().get(courseId.toString()).get('instructors').toJS();
         val.push(parseInt(instructorId));
-        fetch.updateCourse(courseId, { instructors: val }, 'instructors');
+        fetch.updateCourse(courseId, { instructors: val });
     }
 
     // check if any data is being fetched
@@ -833,7 +850,7 @@ class AppState {
 
     // get a sorted list of course codes
     getCourseCodes() {
-        return this.getCoursesList().valueSeq().map(course => course.get('code')).sort();
+        return this.getCoursesList().map(course => course.get('code')).flip().keySeq().sort();
     }
 
     getCourseCodeById(course) {
@@ -879,14 +896,14 @@ class AppState {
         return applicants.entrySeq();
     }
 
-    importChass(data) {
-        fetch.importChass(data);
+    importChass(data, year, semester) {
+        fetch.importChass(data, year, semester);
     }
 
     importEnrolment(data) {
         fetch.importEnrolment(data);
     }
-	
+
     importing() {
         return this.get('importing') > 0;
     }
@@ -934,7 +951,7 @@ class AppState {
         // thinks they are strings
         let val = this.getCoursesList().get(courseId.toString()).get('instructors').toJS();
         val.splice(index, 1);
-        fetch.updateCourse(courseId, { instructors: val }, 'instructors');
+        fetch.updateCourse(courseId, { instructors: val });
     }
 
     setApplicantsList(list) {
@@ -953,93 +970,21 @@ class AppState {
         this.set('courses.list', list);
     }
 
-    setFetchingApplicantsList(fetching, success) {
-        let init = this.get('applicants.fetching'),
+    setFetchingDataList(data, fetching, success) {
+        let init = this.get(data + '.fetching'),
             notifications = this.get('nav.notifications');
         if (fetching) {
             this.set({
-                'applicants.fetching': init + 1,
-                'nav.notifications': notifications.push('<i>Fetching applicants...</i>'),
+                [data + '.fetching']: init + 1,
+                'nav.notifications': notifications.push('<i>Fetching ' + data + '...</i>'),
             });
         } else if (success) {
             this.set({
-                'applicants.fetching': init - 1,
-                'nav.notifications': notifications.push('Successfully fetched applicants.'),
+                [data + '.fetching']: init - 1,
+                'nav.notifications': notifications.push('Successfully fetched ' + data + '.'),
             });
         } else {
-            this.set('applicants.fetching', init - 1);
-        }
-    }
-
-    setFetchingApplicationsList(fetching, success) {
-        let init = this.get('applications.fetching'),
-            notifications = this.get('nav.notifications');
-        if (fetching) {
-            this.set({
-                'applications.fetching': init + 1,
-                'nav.notifications': notifications.push('<i>Fetching applications...</i>'),
-            });
-        } else if (success) {
-            this.set({
-                'applications.fetching': init - 1,
-                'nav.notifications': notifications.push('Successfully fetched applications.'),
-            });
-        } else {
-            this.set('applications.fetching', init - 1);
-        }
-    }
-
-    setFetchingAssignmentsList(fetching, success) {
-        let init = this.get('assignments.fetching'),
-            notifications = this.get('nav.notifications');
-        if (fetching) {
-            this.set({
-                'assignments.fetching': init + 1,
-                'nav.notifications': notifications.push('<i>Fetching assignments...</i>'),
-            });
-        } else if (success) {
-            this.set({
-                'assignments.fetching': init - 1,
-                'nav.notifications': notifications.push('Successfully fetched assignments.'),
-            });
-        } else {
-            this.set('assignments.fetching', init - 1);
-        }
-    }
-
-    setFetchingCoursesList(fetching, success) {
-        let init = this.get('courses.fetching'),
-            notifications = this.get('nav.notifications');
-        if (fetching) {
-            this.set({
-                'courses.fetching': init + 1,
-                'nav.notifications': notifications.push('<i>Fetching courses...</i>'),
-            });
-        } else if (success) {
-            this.set({
-                'courses.fetching': init - 1,
-                'nav.notifications': notifications.push('Successfully fetched courses.'),
-            });
-        } else {
-            this.set('courses.fetching', init - 1);
-        }
-    }
-
-    setFetchingInstructorsList(fetching, success) {
-        let init = this.get('instructors.fetching'),
-            notifications = this.get('nav.notifications');
-        if (fetching) {
-            this.set({
-                'instructors.fetching': init + 1,
-                'nav.notifications': notifications.push('<i>Fetching instructors...</i>'),
-            });
-        } else if (success) {
-            this.set({
-                'instructors.fetching': init - 1,
-                'nav.notifications': notifications.push('Successfully fetched instructors.'),
-            });
-        } else {
-            this.set('instructors.fetching', init - 1);
+            this.set(data + '.fetching', init - 1);
         }
     }
 
@@ -1073,9 +1018,9 @@ class AppState {
         fetch.unlockAssignment(applicant, assignment);
     }
 
-    updateCourse(courseId, val, props) {
+    updateCourse(courseId, val, attr) {
         let data = {};
-        switch (props) {
+        switch (attr) {
             case 'estimatedPositions':
                 data['estimated_count'] = val;
                 break;
@@ -1083,7 +1028,7 @@ class AppState {
                 data['hours'] = val;
                 break;
             case 'estimatedEnrol':
-                data['current_enrollment'] = val;
+                data['current_enrolment'] = val;
                 break;
             case 'qual':
                 data['qualifications'] = val;
@@ -1092,13 +1037,19 @@ class AppState {
                 data['duties'] = val;
                 break;
             case 'cap':
-                data['cap_enrollment'] = val;
+                data['cap_enrolment'] = val;
                 break;
             case 'waitlist':
                 data['num_waitlisted'] = val;
                 break;
+            case 'startDate':
+                data['start_date'] = val;
+                break;
+            case 'endDate':
+                data['end_date'] = val;
+                break;
         }
-        fetch.updateCourse(courseId, data, props);
+        fetch.updateCourse(courseId, data);
     }
 }
 

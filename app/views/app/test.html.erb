@@ -1,249 +1,346 @@
 <!DOCTYPE html>
+
 <html>
   <head>
-    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+    <title>DDAH Test</title>
   </head>
+  <style>
+    .instructor_section{
+      width: 100%;
+      min-height: 50px;
+    }
+    .path{
+      width: 180px;
+
+    }
+  </style>
   <body>
-    <h1>Offers Importer</h1>
-    <input id="import" type="file"/></br></br>
-    <button onclick="loadFile()">Import Offer</button>
-    <h1>Locked Assignments Importer</h1>
-    <button onclick="importAssignments()">Import Locked Assignments</button>
-    <h1>Offers</h1>
-    <form method="post">
-      <input type="button" value="Send Contract" onclick="send_contract()">
-      <input type="button" value="Email" onclick="email()">
-      <input type="button" value="Set as HR-Processed" onclick="hr_processed()">
-      <input type="button" value="Set as DDAH-accepted" onclick="ddah_accepted()">
-      <table>
-        <tr>
-          <th>Select</th>
-          <th>Decision Link</th>
-          <th>Last Name</th>
-          <th>First Name</th>
-          <th>Student Number</th>
-          <th>Position</th>
-          <th>Hours</th>
-          <th>Sent</th>
-          <th>Status</th>
-          <th>HR status</th>
-          <th>DDAH status</th>
-        </tr>
-        <% @offers.each do |o| %>
-          <tr>
-            <th><input type="checkbox" onclick="updateOfferSelected(this, <%=o[:id] %>, '<%=o[:applicant][:email]%>');"></th>
-            <th><a href="offers/<%=o[:id] %>/pdf">Link</a></th>
-            <th><%= o[:applicant][:last_name]%></th>
-            <th><%= o[:applicant][:first_name]%></th>
-            <th><%= o[:applicant][:student_number]%></th>
-            <th><%= o[:position]%></th>
-            <th><%= o[:hours]%></th>
-            <th><%= o[:status]!="Unsent" %></th>
-            <th><%= o[:status]%></th>
-            <th><%= o[:hr_status]? o[:hr_status]: "n/a"%></th>
-            <th><%= o[:ddah_status]? o[:ddah_status]: "n/a"%></th>
-          </tr>
-        <% end %>
-      </table>
-    </form>
-    <h1>Contracts</h1>
-    <form method="post">
-      <input type="button" value="Nag" onclick="nag()">
-      <input type="button" value="Print Contracts" onclick="print()">
-      <table style="margin-top: 10px;">
-        <tr style="text-align: left;">
-          <th>Select</th>
-          <th>File</th>
-          <th>Last Name</th>
-          <th>First Name</th>
-          <th>Student Number</th>
-          <th>Position</th>
-          <th>Status</th>
-          <th>Action</th>
-          <th>Contract Send Date</th>
-          <th>Deadline</th>
-          <th>Nag Count</th>
-          <th>Print Date</th>
-        </tr>
-        <% @offers.each do |c| %>
-          <% if c[:send_date] %>
-            <tr>
-              <th><input type="checkbox" onclick="updateContractSelected(this, <%=c[:id] %>);"></th>
-              <th><button type="button" onclick="showContract(<%=c[:id] %>)">Contract</button></th>
-              <th><%= c[:applicant][:last_name]%></th>
-              <th><%= c[:applicant][:first_name]%></th>
-              <th><%= c[:applicant][:student_number]%></th>
-              <th><%= c[:position]%></th>
-              <th><%= c[:status]%></th>
-              <th><button type="button" onclick="withdraw(<%= c[:id]%>, '<%=c[:status]%>')">Withdraw</button></th>
-              <th><%= (c[:updated_at].in_time_zone('Eastern Time (US & Canada)')).strftime("%B %e, %Y") %></th>
-              <th><%= c[:deadline]? ((c[:deadline].in_time_zone('Eastern Time (US & Canada)')).strftime("%B %e, %Y")):"" %></th>
-              <th><%= c[:nag_count]%></th>
-              <th><%= c[:print_time]? c[:print_time]: "n/a"%></th>
-            </tr>
-          <% end %>
-        <% end %>
-      </table>
-    </form>
-    <h1>Sessions</h1>
-    <ul>
-      <% @sessions.each do |s| %>
-        <li>
-          <h2><%= s[:semester] %> <%= s[:year] %></h2>
-          <p>Start Date: <%= s[:start_date].in_time_zone('Eastern Time (US & Canada)').strftime("%B %e, %Y") %></p>
-          <p>End Date: <%= s[:end_date].in_time_zone('Eastern Time (US & Canada)').strftime("%B %e, %Y") %></p>
-          <p>Pay: <input type="number" value="<%= "%.2f" % s[:pay]%>" step="0.01" min="0.00" onblur="updateSession(this, <%=s[:id]%>)"/></p>
-        </li>
-      <% end %>
-    </ul>
+    <h1>DDAH Test</h1>
+    <% Instructor.all.each do |instructor|%>
+      <div class="instructor_section">
+        <h2><%=instructor[:name]%></h2>
+        <button onclick="setupOffers('<%=instructor[:utorid]%>')">GET /instructors/<%=instructor[:utorid]%>/offers</button>
+        <button onclick="setupPositions('<%=instructor[:utorid]%>')">GET /instructors/<%=instructor[:utorid]%>/positions</button>
+        <button onclick="setupTemplates('<%=instructor[:utorid]%>')">GET /instructors/<%=instructor[:utorid]%>/templates</button>
+        <h3>Templates</h3>
+        <div id="<%=instructor[:utorid]%>_templates">
+        </div>
+        <h3>Offers</h3>
+        <div id="<%=instructor[:utorid]%>_offers">
+        </div>
+        <h3>Positions</h3>
+        <div id="<%=instructor[:utorid]%>_positions">
+        </div>
+      </div>
+    <% end %>
     <script>
-      contract_selected = [];
-      offer_selected = [];
-      email_selected = [];
-      function updateContractSelected(checkbox, val){
-        if (checkbox.checked)
-          contract_selected.push(val)
-        else
-          contract_selected.splice(contract_selected.indexOf(val),1);
+      let offers = {};
+      let positions = {};
+      let templates = {};
+      function setMessage(response){
+        alert(response["message"]);
       }
-      function updateOfferSelected(checkbox, val, email){
-        if (checkbox.checked){
-          offer_selected.push(val);
-          email_selected.push(email);
+      function setControls(controls, div){
+        content = div.innerHTML;
+        div.innerHTML = controls+ content;
+      }
+      function setupTemplates(utorid){
+        let div = document.getElementById(utorid+"_templates")
+        getHelper("/instructors/"+utorid+"/templates", createTemplateTable, utorid, div);
+      }
+      function createTemplateTable(templates, div, utorid){
+        app["templates"][utorid] = templates;
+        setupOffers(utorid);
+      	let headers = [
+          "Action",
+      		"Template Name",
+          "Position",
+          "Preview",
+      	];
+      	let rows = [];
+      	for (template in templates){
+          template = templates[template];
+      		rows.push([
+            createTemplateActionButtons(template["id"]),
+            template["name"],
+            template["position"]["position"],
+            createTemplatePreviewLink(template["id"]),
+      		]);
+      	}
+        controls = createTemplateControls(utorid);
+      	setTable(headers, rows, div);
+        setControls(controls, div);
+      }
+      function createTemplatePreviewLink(id){
+        return "<a href='/templates/"+id+"/preview'>Link</a>";
+      }
+      function createTemplateControls(utorid){
+        return createPositionOptions(utorid)+"Template Name: <input id='"+utorid+"_template_name' type='text' /><button onClick='createTemplate(\""+utorid+"\")'>Create Template route: POST /instructors/"+utorid+"/templates</button>";
+      }
+      function createPositionOptions(utorid){
+        options = "Course: <select id='"+utorid+"_template_course'><option>Choose a Course</option>";
+        for (i in app["positions"][utorid]){
+          position = app["positions"][utorid][i];
+          options+="<option value='"+position["id"]+"'>"+position["position"]+"</option>";
+        }
+        options+="</select>";
+        return options;
+      }
+      function createTemplate(utorid){
+        name = document.getElementById(utorid+"_template_name").value.trim();
+        position = document.getElementById(utorid+"_template_course");
+        position_value = position.options[position.selectedIndex].value;
+        if (name != "" && position.selectedIndex!=0){
+          data = {position_id: position_value, name: name};
+          postHelper("/instructors/"+utorid+"/templates", data, setMessage);
         }
         else{
-          offer_selected.splice(offer_selected.indexOf(val),1);
-          email_selected.splice(email_selected.indexOf(email),1);
+          alert("Error: Missing either course or template name input");
         }
       }
-      function fetchHelper(url, init, message, file, print){
-        fetch(url, init).then(function(response) {
-          if (response.status==204){
-            return {message: message};
-          }
-          else{
-            if (file){
-              return response.blob();
-            }
-            else{
-              return response.json();
-            }
-          }
-        }).then(function(response){
-          if (file){
-            let fileURL = URL.createObjectURL(response);
-            if (print){
-              pdf = window.open(fileURL);
-              pdf.document.onload= pdf.print();
-            }
-            else{
-              window.location= fileURL;
-            }
-          }
-          else{
-            location.reload();
-            alert(response.message);
-          }
-        })
+      function createTemplateActionButtons(template_id){
+        return "<button>Edit</button><button>Delete</button>";
       }
-      function postHelper(url, data, message="", file=false, print= false){
+      function setupPositions(utorid){
+        let div = document.getElementById(utorid+"_positions")
+        getHelper("/instructors/"+utorid+"/positions", createPositionTable, utorid, div);
+      }
+      function createPositionTable(positions, div, utorid){
+        app["positions"][utorid] = positions;
+        setupTemplates(utorid);
+      	let headers = [
+      		"Position",
+          "Course Name",
+          "Cap Enrolment",
+          "Current Enrolment",
+          "# WaitListed",
+      	];
+      	let rows = [];
+      	for (position in positions){
+          position = positions[position];
+      		rows.push([
+            position["position"],
+            position["course_name"],
+            position["cap_enrolment"],
+            position["current_enrolment"],
+            position["num_waitlisted"],
+      		]);
+      	}
+      	setTable(headers, rows, div);
+      }
+      function setupOffers(utorid){
+        let div = document.getElementById(utorid+"_offers")
+        getHelper("/instructors/"+utorid+"/offers", createOfferTable, utorid, div);
+      }
+      function createOfferTable(offers, div, utorid){
+        app["offers"][utorid] = offers;
+      	let headers = [
+      		"Action",
+      		"Last Name",
+      		"First Name",
+          "Email",
+      		"Position",
+      		"Hours",
+          "Status",
+      		"DDAH Status",
+          "Create Fresh DDAH Form",
+          "Create DDAH Form With Template",
+      		"Preview",
+      		"Student-View",
+      	];
+      	let rows = [];
+      	for (offer in offers){
+          offer = offers[offer];
+      		rows.push([
+      			createCheckBox(div, offer["id"]),
+      			offer["applicant"]["last_name"],
+            offer["applicant"]["first_name"],
+            offer["applicant"]["email"],
+      			offer["position"],
+      			offer["hours"],
+            offer["status"],
+      			offer["ddah_status"],
+            createDDAHButton(offer["id"], utorid, offer["ddah_status"], 1),
+            createDDAHButton(offer["id"], utorid, offer["ddah_status"], 2),
+      			createDDAHLink(1, offer["id"]),
+      			createDDAHLink(2, offer["id"]),
+      		]);
+      	}
+      	setTable(headers, rows, div);
+      }
+      function createTemplateOptions(utorid, offer_id){
+        options = "<select id='"+utorid+"_offers_"+offer_id+"_template'><option>Choose a Template</option>";
+        position_id = getPositionByOffer(utorid, offer_id);
+        for (i in app["templates"][utorid]){
+          template = app["templates"][utorid][i];
+          if (template["position"]["id"]==position_id)
+           options+="<option value='"+template["id"]+"'>"+template["name"]+"</option>";
+        }
+        options+="</select>";
+        return options;
+      }
+      function getPositionByOffer(utorid, offer_id){
+        offers = app["offers"][utorid];
+        for (i in offers){
+          offer = offers[i];
+          if (offer["id"] == offer_id){
+            return offer["position_id"];
+          }
+        }
+        return null;
+      }
+      function createCheckBox(div, id){
+      	return "<input type='checkbox' onclick='clickCheckBox(this, \""+div.id+"\", "+id+", \"offers\")' />";
+      }
+      function clickCheckBox(self, div_id, id, type){
+        let obj = setObjType(type);
+        if (obj[div_id]===undefined)
+          obj[div_id] = [];
+        if(self.checked)
+          obj[div_id].push(id);
+        else
+          obj[div_id].splice(obj[div_id].indexOf(id), 1);
+      }
+      function setObjType(type){
+        if(type == "offers")
+          return offers;
+        else if(type == "positions")
+          return positions;
+        else if(type == "templates")
+          return templates;
+      }
+      function createDDAHButton(id, utorid, ddah_status, type){
+        if (type ==1)
+      	 return "<button class='path' onclick='createFreshDDAH(\""+utorid+"\", "
+            +id+")' >POST /instructors/"+utorid
+            +"/ddahs, use_template = false, offer_id = "+id+"</button>";
+        if (type ==2)
+       	 return createTemplateOptions(utorid, id)+"<button class='path' onclick='createTemplateDDAH(\""+utorid+"\", "
+            +id+")' >POST /instructors/"+utorid
+            +"/ddahs, use_template = true, offer_id = "+id+"</button>";
+      }
+      function createDDAHLink(type, offer_id){
+      	switch(type){
+      		case 1:
+      			return "<a href='/pb/ddah/"+offer_id+"/pdf'>Link</a>";
+      		case 2:
+      			return "<a href='/pb/ddah/"+offer_id+"'>Link</a>";
+      	}
+      }
+      function createFreshDDAH(utorid, offer_id, div){
+      	postHelper("/instructors/"+utorid+"/ddahs", {use_template: false, offer_id: offer_id}, setMessage);
+      }
+      function createTemplateDDAH(utorid, offer_id, div){
+        template = document.getElementById(utorid+"_offers_"+offer_id+"_template");
+        chosen = template.options[template.selectedIndex].value;
+        if (template.selectedIndex != 0){
+          postHelper("/instructors/"+utorid+"/ddahs", {use_template: true, offer_id: offer_id, template_id: chosen}, setMessage);
+        }
+        else{
+          alert("You need to choose a template");
+        }
+      }
+      function setTable(headers, rows, div){
+      	let header = setHeader(headers);
+      	let tablerows = "";
+      	for (row in rows){
+          row = rows[row];
+      		tablerows+= setRow(row);
+      	}
+        div.innerHTML = "<table id='"+div.id+"'>"+header+tablerows+"</table>";
+      }
+      function setHeader(headers){
+      	let header = "<tr>";
+      	for (item in headers){
+          item = headers[item];
+      		header+= "<th>"+item+"</th>";
+      	}
+      	header+="</tr>";
+      	return header;
+      }
+      function setRow(row){
+      	let tablerow = "<tr>";
+      	for(item in row){
+          item = row[item];
+      		tablerow+="<td>"+item+"</td>";
+      	}
+      	tablerow+="</tr>";
+      	return tablerow;
+      }
+      function fetchHelper(url, init, action, utorid = null, div = null){
+        fetch(url, init).then(function(response) {
+          return response.json();
+        }).then(function(response){
+          if (utorid !=null){
+            if(div!=null){
+              action(response, div, utorid);
+            }
+            else{
+              action(response, utorid);
+            }
+          }
+          else{
+            if(div!=null){
+              action(response, div);
+            }
+            else{
+              action(response);
+            }
+          }
+        });
+      }
+      function getHelper(url, action, div = null, utorid = null){
+        let init = {
+            headers: {
+                Accept: 'application/json',
+            },
+            method: 'GET',
+            credentials: 'include',
+        };
+        fetchHelper(url, init, action, div, utorid);
+      }
+      function postHelper(url, data, action, div = null, utorid = null){
         let init = {
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json; charset=utf-8',
             },
             method: 'POST',
-            body: JSON.stringify(data)
-        };
-        fetchHelper(url, init, message,file, print);
-      }
-      function putHelper(url, data, message="", file=false, print = false){
-        let init = {
-            headers: {
-                'Content-Type': 'application/json; charset=utf-8',
-            },
-            method: 'PUT',
             body: JSON.stringify(data),
+            credentials: 'include',
         };
-        fetchHelper(url, init, message,file);
+        fetchHelper(url, init, action, div, utorid);
       }
-      function importAssignments(){
-        postHelper("/import/locked-assignments", {}, "Offers Imported")
-      }
-      function send_contract(){
-        postHelper("/offers/send-contracts", {offers: offer_selected})
-      }
-      function email(){
-        var a = document.createElement('A');
-        a.href = "mailto:"+email_selected.join(";");
-        a.click();
-      }
-      function hr_processed(){
-        putHelper("/offers/batch-update", {offers:offer_selected, hr_status: "Processed"}, "HR status updated")
-      }
-      function ddah_accepted(){
-        putHelper("/offers/batch-update", {offers:offer_selected, ddah_status: "Accepted"}, "DDAH status updated")
-      }
-      function nag(){
-        postHelper("/offers/nag", {contracts:contract_selected}, "")
-      }
-      function print(){
-        postHelper("/offers/print", {contracts:contract_selected, update: true}, "", true, true)
-      }
-      function showContract(id){
-        postHelper("/offers/print", {contracts: [id], update: false}, "", true)
-      }
-      function updateSession(input, id){
-        let data = {pay: input.value};
+      function putHelper(URL, data, action, div = null, utorid = null) {
         let init = {
             headers: {
                 'Content-Type': 'application/json; charset=utf-8',
             },
             method: 'PUT',
-            body: JSON.stringify(data)
-        };
-        fetchHelper("/sessions/"+id, init, "Pay updated");
-      }
-      function withdraw(id, status){
-        if(status=="Pending"){
-          postHelper("/offers/"+id+"/decision/withdraw", {});
+            body: JSON.stringify(body),
+            credentials: 'include',
         }
-        else{
-          alert("Error: you can't change the status of this contract. It's already been "+status.toLowerCase()+".");
+        fetchHelper(URL, init, action, div, utorid);
+      }
+      function deleteHelper(URL, action, div= null, utorid = null) {
+        let init = {
+            method: 'DELETE',
+            credentials: 'include',
+        }
+        fetchHelper(URL, init, action, div, utorid);
+      }
+      function setupPage(){
+        for (i in instructors){
+          utorid = instructors[i];
+          setupPositions(utorid);
         }
       }
-      function loadFile() {
-          let files = document.getElementById('import').files;
-          if (files.length > 0) {
-              let message =
-                  'Are you sure you want to import "' + files[0].name + '" into the database?';
-              if (files[0].type == 'application/json') {
-                  if (confirm(message)) {
-                      uploadFile(files[0]);
-                  }
-              } else {
-                  alert('Error: The file you uploaded is not a JSON.');
-              }
-          } else {
-              alert('Error: No file chosen.');
-          }
-      }
-
-      function uploadFile(file) {
-          let reader = new FileReader();
-          reader.onload = function(event) {
-              let data = JSON.parse(event.target.result);
-
-              if (data['offers'] !== undefined) {
-                  data = { chass_offers: data };
-                  postHelper("/import/offers", data, "Offers Imported");
-              } else {
-                  alert("Error: This is not Chass Offers JSON.")
-              }
-          };
-          reader.readAsText(file);
-      }
-
+      instructors = []
+      app = {positions: {}, offers: {}, templates: {}};
+      <% @instructors.each do |instructor| %>
+        instructors.push('<%= instructor %>');
+      <% end %>
+      setupPage();
     </script>
   </body>
 </html>

@@ -1,6 +1,11 @@
 class AppController < ApplicationController
-  protect_from_forgery with: :exception
-  include Mangler
+  skip_before_action :verify_authenticity_token
+  include Authorizer
+  before_action :tapp_admin, only: [:tapp]
+  before_action :cp_access, only: [:cp]
+  before_action :app_access, only: [:roles]
+  before_action :correct_applicant, only: [:student_view, :ddah_view]
+  before_action :cp_admin, only: [:test]
 
   ''' TAPP functions '''
   def tapp
@@ -8,54 +13,67 @@ class AppController < ApplicationController
   end
 
   ''' CP functions '''
-
   def cp
     render :cp, layout: false
   end
 
-  def test
-    @offers = Offer.all.map {|o| o.format }
-    @sessions = Session.all
-    render :test, layout: false
+  def roles
+    if ENV['RAILS_ENV'] == 'production'
+      render json: {development: false, utorid: session[:utorid], roles: session[:roles]}
+    else
+      render json: {development: true, utorid: "development", roles: session[:roles]}
+    end
   end
 
-  '''
-    Shows the student facing view when the applicant is looking at the page.
-    This uses a route of /pb/:mangled, so that the applicant can`t attack
-    access the decision page of another student.
-  '''
   def student_view
-    offer_id = get_offer_id(params[:mangled])
-    if offer_id
-      show_decision_view(decrypt(params[:mangled], offer_id))
+    offer = Offer.find(params[:offer_id])
+    if offer
+      if offer[:send_date]
+        @offer = offer.format.merge({mangled: offer[:link]})
+        render :decision, layout: false
+      else
+        render status: 404, json: {message: "Offer #{offer[:id]} hasn't been sent."}
+      end
     else
       render status: 404, json: {message: "There is no such page."}
     end
   end
 
-  private
-  def show_decision_view(params)
-    applicant = Applicant.find_by_utorid(params[:utorid])
-    if applicant
-      position = Position.find(params[:position_id])
-      if position
-        offer = Offer.find_by(applicant_id: applicant[:id], position_id: position[:id])
-        if offer
-          if offer[:send_date]
-            @offer = offer.format.except(:id).merge({mangled: offer[:link]})
-            render :decision, layout: false
-          else
-            render status: 404, json: {message: "Offer #{offer[:id]} hasn't been sent."}
-          end
-        else
-          render status: 404, json: {message: "TAship for #{position[:position]} was not offered to #{applicant[:first_name]} #{applicant[:last_name]}."}
-        end
+  def ddah_view
+    ddah = Ddah.find_by(offer_id: params[:offer_id])
+    if ddah
+      offer = Offer.find(params[:offer_id])
+      if offer[:ddah_status]== "Pending" || offer[:ddah_status]== "Accepted"
+        @ddah = ddah.format
+        @offer = offer.format
+        render :ddah, layout: false
       else
-        render status: 404, json: {message: "No such position."}
+        render status: 404, json: {message: "DDAH #{ddah[:id]} hasn't been sent."}
       end
     else
-      render status: 404, json: {message: "No such applicant."}
+      render status: 404, json: {message: "There is no such page."}
     end
+  end
+
+  def logout
+    Rails.logger.info("session login: #{session[:logged_in]}")
+    session[:logged_in] = false
+    Rails.logger.info("session login: #{session[:logged_in]}")
+    redirect_back(fallback_location: request.referrer)
+  end
+
+  def reenter_session
+    Rails.logger.info("session login: #{session[:logged_in]}")
+    session[:logged_in] = true
+    Rails.logger.info("session login: #{session[:logged_in]}")
+  end
+
+  def test
+    @instructors = []
+    Instructor.all.each do |instructor|
+      @instructors.push(instructor[:utorid].to_s)
+    end
+    render :test, layout: false
   end
 
 end

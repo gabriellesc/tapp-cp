@@ -1,5 +1,10 @@
 class ExportController < ApplicationController
   protect_from_forgery with: :null_session
+  include Authorizer
+  before_action :tapp_admin, except: [:cp_offers]
+  before_action only: [:cp_offers] do
+    cp_admin(true)
+  end
 
   def chass
     exporter = ChassExporter.new
@@ -22,6 +27,12 @@ class ExportController < ApplicationController
   def transcript_access
     generator = CSVGenerator.new
     response = generator.generate_transcript_access
+    render_helper(response)
+  end
+
+  def cp_offers
+    generator = CSVGenerator.new
+    response = generator.generate_cp_offers(params[:session_id])
     render_helper(response)
   end
 

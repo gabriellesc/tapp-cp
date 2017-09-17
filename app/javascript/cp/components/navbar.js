@@ -1,9 +1,41 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import ReactDOMServer from 'react-dom/server';
 
-import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
+import {
+    Navbar,
+    Nav,
+    NavItem,
+    NavDropdown,
+    MenuItem,
+    FormGroup,
+    ControlLabel,
+    FormControl,
+} from 'react-bootstrap';
+
+import { routeConfig } from '../routeConfig.js';
+import { DdahAppendix } from './ddahAppendix.js';
 
 /*** Navbar components ***/
+
+const ViewTab = props =>
+    <li role="presentation" className={props.activeKey == props.id ? 'active' : ''}>
+        <Link to={props.route} className="navbar-link">
+            {props.label}
+        </Link>
+    </li>;
+
+const ViewTabs = props => {
+    let activeKey = props.appState.getSelectedNavTab();
+
+    return (
+        <ul className="nav navbar-nav navbar-left">
+            <ViewTab activeKey={activeKey} {...routeConfig.controlPanel} />
+            <ViewTab activeKey={activeKey} {...routeConfig.ddahs} />
+        </ul>
+    );
+};
 
 const Notifications = props => {
     let notifications = props.appState.getUnreadNotifications();
@@ -30,26 +62,38 @@ const Notifications = props => {
     );
 };
 
-const Auth = props =>
-    <NavDropdown
-        title={props.appState.getCurrentUserRole() + ':' + props.appState.getCurrentUserName()}
-        id="nav-auth-dropdown">
-        <MenuItem eventKey="switch-admin" onClick={() => props.appState.setCurrentUserRole('admin')}>
-            Switch to admin role
-        </MenuItem>
+const Auth = props => {
+    let roles = props.appState.getCurrentUserRoles(),
+        role = props.appState.getSelectedUserRole(),
+        name = props.appState.getCurrentUserName();
 
-        <MenuItem eventKey="switch-hris" onClick={() => props.appState.setCurrentUserRole('hris')}>
-            Switch to hris role
-        </MenuItem>
-
-        <MenuItem eventKey="switch-inst" onClick={() => props.appState.setCurrentUserRole('inst')}>
-            Switch to inst role
-        </MenuItem>
-
-        <MenuItem eventKey="logout">
-            Logout
-        </MenuItem>
-    </NavDropdown>;
+    return (
+        <NavDropdown title={role + ':' + name} id="nav-auth-dropdown">
+            {roles.map(
+                r =>
+                    role != r &&
+                    <MenuItem
+                        key={'switch-' + r}
+                        onClick={() => {
+                            props.appState.selectUserRole(r);
+                            props.appState.fetchAll();
+                        }}>
+                        Switch to {r} role
+                    </MenuItem>
+            )}
+            <MenuItem
+                onClick={() => {
+                    var form = document.createElement('form');
+                    form.action = '/logout';
+                    form.method = 'post';
+                    document.body.append(form);
+                    form.submit();
+                }}>
+                Logout
+            </MenuItem>
+        </NavDropdown>
+    );
+};
 
 /*** Navbar ***/
 
@@ -59,7 +103,27 @@ const NavbarInst = props =>
             <Navbar.Brand>TAPP:CP</Navbar.Brand>
         </Navbar.Header>
 
+        {props.appState.getSelectedUserRole() == 'cp_admin' && <ViewTabs {...props} />}
+
         <Nav pullRight>
+            {props.appState.getSelectedUserRole() == 'instructor' &&
+                <i
+                    className="fa fa-question-circle"
+                    style={{
+                        cursor: 'pointer',
+                        fontSize: '20px',
+                        float: 'left',
+                        padding: '15px 5px',
+                        color: '#5bc0de',
+                    }}
+                    title="List of Suggested Tasks and Teaching Techniques"
+                    onClick={() => {
+                        let popup = window.open();
+                        popup.document.open();
+                        popup.document.write(ReactDOMServer.renderToStaticMarkup(<DdahAppendix />));
+                    }}
+                />}
+
             <Notifications {...props} />
             <Auth {...props} />
         </Nav>

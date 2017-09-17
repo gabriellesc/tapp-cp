@@ -6,8 +6,6 @@ RSpec.describe AssignmentsController, type: :controller do
     Session.create!(
       semester: "Fall",
       year: 2017,
-      start_date: "2017-09-01 00:00:00 UTC",
-      end_date: "2017-12-31 00:00:00 UTC",
     )
   end
 
@@ -19,15 +17,17 @@ RSpec.describe AssignmentsController, type: :controller do
         open: true,
         campus_code: 1,
         course_name: "Introduction to Software Testing",
-        current_enrollment: 50,
+        current_enrolment: 50,
         duties: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eget dignissim sem. Curabitur at semper eros. Aenean nec sem lobortis, scelerisque mi at, aliquam diam. Mauris malesuada elit nibh, sed hendrerit nulla mattis sed. Mauris laoreet imperdiet dictum. Pellentesque risus nulla, varius ut massa ut, venenatis fringilla sapien. Cras eget euismod augue, eget dignissim erat. Cras nec nibh ullamcorper ante rutrum dapibus sed nec tellus. In hac habitasse platea dictumst. Suspendisse semper tellus ac sem tincidunt auctor.",
         qualifications: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eget dignissim sem. Curabitur at semper eros. Aenean nec sem lobortis, scelerisque mi at, aliquam diam. Mauris malesuada elit nibh, sed hendrerit nulla mattis sed. Mauris laoreet imperdiet dictum. Pellentesque risus nulla, varius ut massa ut, venenatis fringilla sapien. Cras eget euismod augue, eget dignissim erat. Cras nec nibh ullamcorper ante rutrum dapibus sed nec tellus. In hac habitasse platea dictumst. Suspendisse semper tellus ac sem tincidunt auctor.",
         hours: 22,
         estimated_count: 15,
         estimated_total_hours: 330,
         session_id: session.id,
-        cap_enrollment: nil,
+        cap_enrolment: nil,
         num_waitlisted: nil,
+        start_date: "2017-09-01 00:00:00 UTC",
+        end_date: "2017-12-31 00:00:00 UTC",
         )
 
       @applicant = Applicant.create!(
@@ -90,14 +90,14 @@ RSpec.describe AssignmentsController, type: :controller do
         open: true,
         campus_code: 1,
         course_name: "Introduction to Software Testing",
-        current_enrollment: 50,
+        current_enrolment: 50,
         duties: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eget dignissim sem. Curabitur at semper eros. Aenean nec sem lobortis, scelerisque mi at, aliquam diam. Mauris malesuada elit nibh, sed hendrerit nulla mattis sed. Mauris laoreet imperdiet dictum. Pellentesque risus nulla, varius ut massa ut, venenatis fringilla sapien. Cras eget euismod augue, eget dignissim erat. Cras nec nibh ullamcorper ante rutrum dapibus sed nec tellus. In hac habitasse platea dictumst. Suspendisse semper tellus ac sem tincidunt auctor.",
         qualifications: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eget dignissim sem. Curabitur at semper eros. Aenean nec sem lobortis, scelerisque mi at, aliquam diam. Mauris malesuada elit nibh, sed hendrerit nulla mattis sed. Mauris laoreet imperdiet dictum. Pellentesque risus nulla, varius ut massa ut, venenatis fringilla sapien. Cras eget euismod augue, eget dignissim erat. Cras nec nibh ullamcorper ante rutrum dapibus sed nec tellus. In hac habitasse platea dictumst. Suspendisse semper tellus ac sem tincidunt auctor.",
         hours: 22,
         estimated_count: 15,
         estimated_total_hours: 330,
         session_id: session.id,
-        cap_enrollment: nil,
+        cap_enrolment: nil,
         num_waitlisted: nil,
         )
 
@@ -167,15 +167,17 @@ RSpec.describe AssignmentsController, type: :controller do
         open: false,
         campus_code: 1,
         course_name: "Introduction to Programming Languages",
-        current_enrollment: 50,
+        current_enrolment: 50,
         duties: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eget dignissim sem. Curabitur at semper eros. Aenean nec sem lobortis, scelerisque mi at, aliquam diam. Mauris malesuada elit nibh, sed hendrerit nulla mattis sed. Mauris laoreet imperdiet dictum. Pellentesque risus nulla, varius ut massa ut, venenatis fringilla sapien. Cras eget euismod augue, eget dignissim erat. Cras nec nibh ullamcorper ante rutrum dapibus sed nec tellus. In hac habitasse platea dictumst. Suspendisse semper tellus ac sem tincidunt auctor.",
         qualifications: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eget dignissim sem. Curabitur at semper eros. Aenean nec sem lobortis, scelerisque mi at, aliquam diam. Mauris malesuada elit nibh, sed hendrerit nulla mattis sed. Mauris laoreet imperdiet dictum. Pellentesque risus nulla, varius ut massa ut, venenatis fringilla sapien. Cras eget euismod augue, eget dignissim erat. Cras nec nibh ullamcorper ante rutrum dapibus sed nec tellus. In hac habitasse platea dictumst. Suspendisse semper tellus ac sem tincidunt auctor.",
         hours: 22,
         estimated_count: 15,
         estimated_total_hours: 330,
         session_id: session.id,
-        cap_enrollment: nil,
+        cap_enrolment: nil,
         num_waitlisted: nil,
+        start_date: "2017-09-01 00:00:00 UTC",
+        end_date: "2017-12-31 00:00:00 UTC",
         )
 
       @position = Position.create!(
@@ -184,14 +186,14 @@ RSpec.describe AssignmentsController, type: :controller do
         open: true,
         campus_code: 1,
         course_name: "Introduction to Software Testing",
-        current_enrollment: 50,
+        current_enrolment: 50,
         duties: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eget dignissim sem. Curabitur at semper eros. Aenean nec sem lobortis, scelerisque mi at, aliquam diam. Mauris malesuada elit nibh, sed hendrerit nulla mattis sed. Mauris laoreet imperdiet dictum. Pellentesque risus nulla, varius ut massa ut, venenatis fringilla sapien. Cras eget euismod augue, eget dignissim erat. Cras nec nibh ullamcorper ante rutrum dapibus sed nec tellus. In hac habitasse platea dictumst. Suspendisse semper tellus ac sem tincidunt auctor.",
         qualifications: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eget dignissim sem. Curabitur at semper eros. Aenean nec sem lobortis, scelerisque mi at, aliquam diam. Mauris malesuada elit nibh, sed hendrerit nulla mattis sed. Mauris laoreet imperdiet dictum. Pellentesque risus nulla, varius ut massa ut, venenatis fringilla sapien. Cras eget euismod augue, eget dignissim erat. Cras nec nibh ullamcorper ante rutrum dapibus sed nec tellus. In hac habitasse platea dictumst. Suspendisse semper tellus ac sem tincidunt auctor.",
         hours: 22,
         estimated_count: 15,
         estimated_total_hours: 330,
         session_id: session.id,
-        cap_enrollment: nil,
+        cap_enrolment: nil,
         num_waitlisted: nil,
         )
 
@@ -263,15 +265,17 @@ RSpec.describe AssignmentsController, type: :controller do
         open: true,
         campus_code: 1,
         course_name: "Introduction to Software Testing",
-        current_enrollment: 50,
+        current_enrolment: 50,
         duties: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eget dignissim sem. Curabitur at semper eros. Aenean nec sem lobortis, scelerisque mi at, aliquam diam. Mauris malesuada elit nibh, sed hendrerit nulla mattis sed. Mauris laoreet imperdiet dictum. Pellentesque risus nulla, varius ut massa ut, venenatis fringilla sapien. Cras eget euismod augue, eget dignissim erat. Cras nec nibh ullamcorper ante rutrum dapibus sed nec tellus. In hac habitasse platea dictumst. Suspendisse semper tellus ac sem tincidunt auctor.",
         qualifications: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eget dignissim sem. Curabitur at semper eros. Aenean nec sem lobortis, scelerisque mi at, aliquam diam. Mauris malesuada elit nibh, sed hendrerit nulla mattis sed. Mauris laoreet imperdiet dictum. Pellentesque risus nulla, varius ut massa ut, venenatis fringilla sapien. Cras eget euismod augue, eget dignissim erat. Cras nec nibh ullamcorper ante rutrum dapibus sed nec tellus. In hac habitasse platea dictumst. Suspendisse semper tellus ac sem tincidunt auctor.",
         hours: 22,
         estimated_count: 15,
         estimated_total_hours: 330,
         session_id: session.id,
-        cap_enrollment: nil,
+        cap_enrolment: nil,
         num_waitlisted: nil,
+        start_date: "2017-09-01 00:00:00 UTC",
+        end_date: "2017-12-31 00:00:00 UTC",
         )
 
       @applicant = Applicant.create!(
@@ -325,11 +329,11 @@ RSpec.describe AssignmentsController, type: :controller do
 
     context "when export_date is valid" do
       it "updates the assignment" do
-        patch :update, params: { applicant_id: @applicant.id, id: @assignment.id, export_date: "2017-08-08T15:25:03.000Z"}
+        patch :update, params: { applicant_id: @applicant.id, id: @assignment.id, export_date: "2017-08-08T15:25:03.000-04:00"}
         expect(response.status).to eq(200)
         expect(parsed_body["applicant_id"]).to eq(@applicant.id)
         expect(parsed_body["id"]).to eq(@assignment.id)
-        expect(parsed_body["export_date"]).to eq("2017-08-08T15:25:03.000Z")
+        expect(parsed_body["export_date"]).to eq("2017-08-08T15:25:03.000-04:00")
       end
     end
 
@@ -352,15 +356,17 @@ RSpec.describe AssignmentsController, type: :controller do
         open: true,
         campus_code: 1,
         course_name: "Introduction to Software Testing",
-        current_enrollment: 50,
+        current_enrolment: 50,
         duties: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eget dignissim sem. Curabitur at semper eros. Aenean nec sem lobortis, scelerisque mi at, aliquam diam. Mauris malesuada elit nibh, sed hendrerit nulla mattis sed. Mauris laoreet imperdiet dictum. Pellentesque risus nulla, varius ut massa ut, venenatis fringilla sapien. Cras eget euismod augue, eget dignissim erat. Cras nec nibh ullamcorper ante rutrum dapibus sed nec tellus. In hac habitasse platea dictumst. Suspendisse semper tellus ac sem tincidunt auctor.",
         qualifications: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eget dignissim sem. Curabitur at semper eros. Aenean nec sem lobortis, scelerisque mi at, aliquam diam. Mauris malesuada elit nibh, sed hendrerit nulla mattis sed. Mauris laoreet imperdiet dictum. Pellentesque risus nulla, varius ut massa ut, venenatis fringilla sapien. Cras eget euismod augue, eget dignissim erat. Cras nec nibh ullamcorper ante rutrum dapibus sed nec tellus. In hac habitasse platea dictumst. Suspendisse semper tellus ac sem tincidunt auctor.",
         hours: 22,
         estimated_count: 15,
         estimated_total_hours: 330,
         session_id: session.id,
-        cap_enrollment: nil,
+        cap_enrolment: nil,
         num_waitlisted: nil,
+        start_date: "2017-09-01 00:00:00 UTC",
+        end_date: "2017-12-31 00:00:00 UTC",
         )
 
       @applicant = Applicant.create!(

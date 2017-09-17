@@ -6,17 +6,17 @@
 
 <tablerow>First Name:<%= @offer[:applicant][:first_name] %>:
 
-<tablerow>ID Number: <%= @offer[:applicant][:student_number] %>:
+<tablerow>Student ID Number: <%= @offer[:applicant][:student_number] %>:
 
 <b>Returning Employee:</b>
 
 <tablerow>Personnel Number: :Name:<%= @offer[:applicant][:first_name] %> <%= @offer[:applicant][:last_name] %>
 
-<tablerow>Start Date: <%= format_time(@offer[:session][:start_date],2) %>:End Date: <%= format_time(@offer[:session][:end_date],2) %>
+<tablerow>Start Date: <%= format_time(@offer[:start_date],2) %>:End Date: <%= format_time(@offer[:end_date],2) %>
 
 <tablerow>Wage Type: 01 15
 
-<tablerow>Amount: <%= '%.2f' % ((@offer[:hours]/4)* @offer[:session][:pay]) %>
+<tablerow>Amount/Month: <%= '%.2f' % ((@offer[:hours]/4)* @offer[:session][:pay]) %>
 
 <tablerow>Number/Unit: <%= '%.2f' % (@offer[:hours]/4) %>
 
@@ -24,7 +24,7 @@
 
 <b>New Employee:</b>
 
-<tablerow>Personnel Number: :Start Date: <%= format_time(@offer[:session][:start_date],2) %>
+<tablerow>Personnel Number: :Start Date: <%= format_time(@offer[:start_date],2) %>
 
 <tablerow>Form-of-add: :Last Name: <%= @offer[:applicant][:last_name] %>:First Name: <%= @offer[:applicant][:first_name] %>
 
@@ -36,10 +36,14 @@
 
 <tablerow>Province: :Country: :
 
-<tablerow>Federal Tax: :Provincial Tax: :Tax Exemption: :
+<b>Banking Details (Check one of the below):</b>
 
-<tablerow>Bank Key: :Bank Account: :
+<tablerow>Void Cheque: :Direct Deposit: :
 
 <tablerow>Position: :Fund Centre: :Work Contract: :
 
 <tablerow>UofT Student number: <%= @offer[:applicant][:student_number] %>
+
+<tablerow>Citizenship: :Study Permit (Non-Canadian): :
+
+<tablerow>HRIS Position#: <%= get_hr_position_num(@offer[:applicant][:program_id]) %>:CC: :CFC: :Work Contract: K5

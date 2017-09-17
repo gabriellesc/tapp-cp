@@ -6,8 +6,6 @@ RSpec.describe PositionsController, type: :controller do
     Session.create!(
       semester: "Fall",
       year: 2017,
-      start_date: "2017-09-01 00:00:00 UTC",
-      end_date: "2017-12-31 00:00:00 UTC",
     )
   end
 
@@ -18,13 +16,15 @@ RSpec.describe PositionsController, type: :controller do
       open: true,
       campus_code: 1,
       course_name: "Computational Thinking",
-      current_enrollment: nil,
+      current_enrolment: nil,
       duties: "TA duties may include marking, leading skills development tutorials, Q&A/Exam/Assignment/Test Review sessions, and laboratories where noted.",
       qualifications: "Must be enrolled in, or have completed, an undergraduate program in computer science or education (or equivalent). Demonstrated excellent English communication skills. Patience teaching technical concepts to students with a wide variety of non-technical backgrounds. Must have completed or be in the process of completing a course involving functional programming. Must be able to write code in the Intermediate Student Language of Racket, and trace it in the same manner as the Intermediate Student Language Stepper of the DrRacket development environment.",
       hours: 54,
       estimated_count: 17,
       estimated_total_hours: 918,
       session_id: session.id,
+      start_date: "2017-09-01 00:00:00 UTC",
+      end_date: "2017-12-31 00:00:00 UTC",
     )
   end
 
@@ -72,7 +72,7 @@ RSpec.describe PositionsController, type: :controller do
           open: true,
           campus_code: 1,
           course_name: "Computational Thinking",
-          current_enrollment: nil,
+          current_enrolment: nil,
           duties: "simplified duties",
           qualifications: "qualifications",
           hours: 20,
@@ -80,8 +80,10 @@ RSpec.describe PositionsController, type: :controller do
           estimated_total_hours: 300,
           instructors: [instructor.id],
           session_id: session.id,
-          cap_enrollment: nil,
+          cap_enrolment: nil,
           num_waitlisted: nil,
+          start_date: "2017-09-04 00:00:00.000000000-04:00",
+          end_date: "2017-09-05 00:00:00.000000000-04:00",
         }
         expect(position.instructor_ids).to eq([])
         put :update, params: @params
@@ -111,7 +113,7 @@ RSpec.describe PositionsController, type: :controller do
           hours: 20,
           estimated_count: 15,
           estimated_total_hours: 300,
-          cap_enrollment: nil,
+          cap_enrolment: nil,
           num_waitlisted: nil,
         }
         put :update, params: @params

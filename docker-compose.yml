@@ -15,15 +15,19 @@ services:
       EMAIL_TYPE: ${EMAIL_TYPE}
       EMAIL_USER: ${EMAIL_USER}
       TA_COORD: ${TA_COORD}
-      CUPE_SITE: ${CUPE_SITE}
       RECIPIENT: ${RECIPIENT}
+      HR_ADMIN_EMAIL: ${HR_ADMIN_EMAIL}
+      HR_ADMIN_NAME: ${HR_ADMIN_NAME}
+      TAPP_ADMINS: ${TAPP_ADMINS}
+      CP_ADMINS: ${CP_ADMINS}
+      HR_ASSISTANTS: ${HR_ASSISTANTS}
     networks:
       - default
     ports:
       - "3000:3000"
     links:
       - postgres
-      
+
   postgres:
     image: postgres:9.6-alpine
     environment:
@@ -32,3 +36,10 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - /var/lib/postgresql/data
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: ${DOCKER_DEFAULT_SUBNET}

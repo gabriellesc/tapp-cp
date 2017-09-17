@@ -1,8 +1,12 @@
 require 'erb'
 class TemplateParser
 
-  def initialize(files, offer)
-    @offer = offer
+  def initialize(files, data, type)
+    if type == "offer"
+      @offer = data
+    elsif type== "ddah"
+      @ddah = data
+    end
     @data = {}
     files.each do |file|
       set_template_data(file)
@@ -42,6 +46,30 @@ class TemplateParser
     return num_lines
   end
 
+  def get_hr_position_num(status)
+    ug = 14935
+    sgs_I = 14936
+    sgs_II = 14937
+    case status
+    when "1PHD"
+      return sgs_II
+    when "2Msc"
+      return sgs_I
+    when "8UG"
+      return ug
+    else
+      return ""
+    end
+  end
+
+  def set_radio_button(bool, labels)
+    if bool
+      return "(#{labels[0]})"
+    else
+      return "(#{labels[1]})"
+    end
+  end
+
   private
   def set_template_data(name)
     file_data = File.read("#{Rails.root}/app/services/templates/#{name}.html.erb")
@@ -54,13 +82,26 @@ class TemplateParser
   end
 
   def format_time(time, form)
-    time = time.in_time_zone('Eastern Time (US & Canada)')
+    time = time
     case form
     when 1
       return time.strftime("%B %e, %Y")
     when 2
       return time.strftime("%d.%m.%Y")
     end
+  end
+
+  def get_est_enrol_per_ta(position_id, current_enrolment)
+    if !current_enrolment
+      current_enrolment = 0
+    end
+    num = 0
+    Assignment.all.each do |assignment|
+      if assignment[:position_id] == position_id
+        num+=1
+      end
+    end
+    return current_enrolment/num
   end
 
   def list_instructors(instructors)
