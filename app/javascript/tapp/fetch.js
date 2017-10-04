@@ -240,7 +240,17 @@ function onFetchInstructorsSuccess(resp) {
 
 /* Function to GET all resources */
 
-function fetchAll() {
+async function getAndSetApplicants() {
+    try {
+        const applicants = await getApplicants();
+        appState.setApplicantsList(applicants);
+        appState.setFetchingDataList('applicants', false, true);
+    } catch (error) {
+        appState.setFetchingDataList('applicants', false);
+    }    
+}
+
+async function fetchAll() {
     appState.setFetchingDataList('applicants', true);
     appState.setFetchingDataList('applications', true);
     appState.setFetchingDataList('courses', true);
@@ -248,12 +258,13 @@ function fetchAll() {
     appState.setFetchingDataList('instructors', true);
 
     // when applicants are successfully fetched, update the applicants list; set fetching flag to false either way
-    getApplicants()
+    getAndSetApplicants();
+    /*getApplicants()
         .then(applicants => {
             appState.setApplicantsList(applicants);
             appState.setFetchingDataList('applicants', false, true);
         })
-        .catch(() => appState.setFetchingDataList('applicants', false));
+        .catch(() => appState.setFetchingDataList('applicants', false));*/
 
     // when applications are successfully fetched, update the applications list; set fetching flag to false either way
     getApplications()
@@ -324,18 +335,23 @@ function deleteAssignment(applicant, assignment) {
 }
 
 // add/update the notes for an applicant
-function noteApplicant(applicant, notes) {
-    putHelper('/applicants/' + applicant, { commentary: notes })
-        .then(resp => (resp.ok ? resp : respFailure))
-        .then(() => {
+async function noteApplicant(applicant, notes) {
+    try {
+        const resp = await putHelper('/applicants/' + applicant, { commentary: notes });
+    
+        if (resp.ok) {
             appState.setFetchingDataList('applicants', true);
-            getApplicants()
-                .then(applicants => {
-                    appState.setApplicantsList(applicants);
-                    appState.setFetchingDataList('applicants', false, true);
-                })
-                .catch(() => appState.setFetchingDataList('applicants', false));
-        });
+            try {
+                const applicants = await getApplicants();
+                appState.setApplicantsList(applicants);
+                appState.setFetchingDataList('applicants', false, true);
+            } catch (e) {
+               appState.setFetchingDataList('applicants', false);
+            }
+        } else {
+            respFailure(resp);
+        }
+    } catch () {} // ignore putHelper rejecting (network error)
 }
 
 // update the number of hours for an assignment
@@ -373,7 +389,7 @@ function updateCourse(courseId, data) {
 // send CHASS data
 function importChass(data, year, semester) {
     appState.setImporting(true);
-
+    
     postHelper('/import/chass', {
         chass_json: data,
         year: year,
@@ -382,13 +398,18 @@ function importChass(data, year, semester) {
         .then(resp => {
             // import succeeded
             if (resp.ok) {
-                return resp.json().then(resp => {
+                const jsonResp = await resp.json();
+                if (jsonResp.errors) {
+                    jsonResp.message.forEach(message => appState.alert(message));
+                }
+                return Promise.resolve();
+                /*return resp.json().then(resp => {
                     // import succeeded with errors
                     if (resp.errors) {
                         return resp.message.forEach(message => appState.alert(message));
                     }
                     return Promise.resolve();
-                });
+                });*/
             }
             // import failed with errors
             if (resp.status == 404) {
